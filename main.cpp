@@ -1,17 +1,19 @@
 // Do not remove the include below
 #include "main.h"
 
-ParameterProcessor parameterProcessor;
+namespace globals {
+	unsigned long millisRunning = 0;
+}
+SignalProcessor sigPro;
 
 void setup()
 {
+	globals::millisRunning = millis();
 	Serial.begin(115200);
 	delay(200);
-	Serial.println("Hello world, Hallo Welt!");
-	Serial.print("pasSensorPin=");
-	Serial.println(config::pasSensorPin);
+	Serial.println("Start ebico");
 	delay(100);
-	parameterProcessor.startCollect();
+	sigPro.startCollect();
 }
 
 void loop()
