@@ -14,7 +14,10 @@ unsigned long SignalProcessor::pasLastTime = 0;
 unsigned int SignalProcessor::pasTimeOn = 0;
 unsigned int SignalProcessor::pasTimeOff = 0;
 unsigned int SignalProcessor::pasSignalCount = 0;
-byte pasRPM = 0;
+byte SignalProcessor::pasRPM = 0;
+unsigned long SignalProcessor::pasLastProcessing = 0;
+bool SignalProcessor::pasDirection;
+bool SignalProcessor::isPedaling = false;
 
 void SignalProcessor::startCollect() {
 	Serial.println("call: SignalProcessor::collect()");
@@ -49,7 +52,26 @@ void SignalProcessor::collectPasSignals() {
 		SignalProcessor::pasTimeOff += SignalProcessor::pasTime - SignalProcessor::pasLastTime;
 	}
 	SignalProcessor::pasLastTime = SignalProcessor::pasTime;
+}
 
+void SignalProcessor::processSignals() {
+	if (global::millisRunning >= pasLastProcessing + 1000) {
+		isPedaling = pasLastTime > global::millisRunning;
+		pasDirection = pasTimeOn < pasTimeOff;
+		Serial.print("process pas: ");
+		  Serial.print("signal  on=");
+		  Serial.print(pasTimeOn);
+		  Serial.print(", off=");
+		  Serial.print(pasTimeOff);
+		  Serial.print(", direction=");
+		  if (pasTimeOn < pasTimeOff) {
+		    Serial.print("forward");
+		  } else {
+		    Serial.print("backward");
+		  }
+		  Serial.println("");
+		pasLastProcessing = global::millisRunning;
+	}
 }
 
 SignalProcessor::~SignalProcessor() {

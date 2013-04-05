@@ -1,15 +1,11 @@
 // Do not remove the include below
 #include "main.h"
 
-namespace globals {
-	unsigned long millisRunning = 0;
-}
 SignalProcessor sigPro;
 BikeManager bikeManager;
 
-void setup()
-{
-	globals::millisRunning = millis();
+void setup() {
+
 	Serial.begin(115200);
 	delay(200);
 	Serial.println("Start ebico");
@@ -17,6 +13,7 @@ void setup()
 	sigPro.startCollect();
 }
 
-void loop()
-{
+void loop() {
+	global::millisRunning = millis();
+	sigPro.processSignals();
 }

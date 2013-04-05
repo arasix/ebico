@@ -4,6 +4,7 @@
  */
 
 #include "Arduino.h"
+#include "../../main.h"
 
 #ifndef SIGNALPROCESSOR_H_
 #define SIGNALPROCESSOR_H_
@@ -14,7 +15,10 @@ public:
 	virtual ~SignalProcessor();
 	void startCollect();
 	void stopCollect();
+	void processSignals();
 	static byte pasRPM;
+	static bool pasDirection;
+	static bool isPedaling;
 private:
 	static void collectPasSignals();
 	static void collectWheelSignals();
@@ -23,5 +27,6 @@ private:
 	unsigned static int pasTimeOn;
 	unsigned static int pasTimeOff;
 	unsigned static int pasSignalCount;
+	unsigned static long pasLastProcessing;
 };
 #endif /* SIGNALPROCESSOR_H_ */
