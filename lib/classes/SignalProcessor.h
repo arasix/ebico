@@ -23,6 +23,5 @@ private:
 	unsigned static int pasTimeOn;
 	unsigned static int pasTimeOff;
 	unsigned static int pasSignalCount;
-
 };
 #endif /* SIGNALPROCESSOR_H_ */

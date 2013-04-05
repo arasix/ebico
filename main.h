@@ -9,6 +9,7 @@
 #include "Arduino.h"
 #include "config.h"
 #include "lib/classes/SignalProcessor.h"
+#include "lib/classes/BikeManager.h"
 //add your includes for the project ebico here
 
 

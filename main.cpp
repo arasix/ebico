@@ -5,6 +5,7 @@ namespace globals {
 	unsigned long millisRunning = 0;
 }
 SignalProcessor sigPro;
+BikeManager bikeManager;
 
 void setup()
 {
@@ -18,5 +19,4 @@ void setup()
 
 void loop()
 {
-//Add your repeated code here
 }
