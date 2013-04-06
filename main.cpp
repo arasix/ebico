@@ -14,6 +14,6 @@ void setup() {
 }
 
 void loop() {
-	global::millisRunning = millis();
+	Global::timeRunning = millis();
 	sigPro.processSignals();
 }

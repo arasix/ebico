@@ -11,6 +11,7 @@ namespace config {
 	static const uint8_t wheelSensorPin = 3;
 	static const uint8_t brakeSensorPin = 4;
 	static const uint8_t throttleSensorPin = A0;
+	static const uint8_t pasNrMagnets = 12;
 };
 
 #endif /* CONFIG_H_ */

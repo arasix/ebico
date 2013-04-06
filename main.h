@@ -8,7 +8,7 @@
 #define ebico_H_
 #include "Arduino.h"
 #include "config.h"
-#include "lib/global.h"
+#include "lib/classes/Global.h"
 #include "lib/classes/SignalProcessor.h"
 #include "lib/classes/BikeManager.h"
 //add your includes for the project ebico here
