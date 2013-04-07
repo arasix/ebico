@@ -10,10 +10,16 @@ void setup() {
 	delay(200);
 	Serial.println("Start ebico");
 	delay(100);
+	bikeManager.initPins();
 	sigPro.startCollect();
 }
 
 void loop() {
 	Global::timeRunning = millis();
-	sigPro.processSignals();
+	bool isReady = sigPro.processSignals();
+	if (isReady) {
+		int throttleOutSignal = bikeManager.throttleOutSignal();
+
+		bikeManager.adjustThrottle(throttleOutSignal);
+	}
 }

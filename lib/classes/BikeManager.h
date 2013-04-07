@@ -12,6 +12,13 @@ class BikeManager {
 public:
 	BikeManager();
 	virtual ~BikeManager();
+	unsigned int throttleOutSignal();
+	void initPins();
+	void adjustThrottle(int value);
+private:
+	unsigned static int currentThrottleValue;
+	unsigned static int targetThrottleValue;
+	unsigned static long throttleLastProcessing;
 };
 
 #endif /* BIKEMANAGER_H_ */
