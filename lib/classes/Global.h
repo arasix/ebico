@@ -11,6 +11,7 @@
 class Global {
 public:
 	unsigned static long timeRunning;
+	unsigned static long microsecRunning;
 };
 
 #endif /* GLOBAL_H_ */

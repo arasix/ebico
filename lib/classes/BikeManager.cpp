@@ -40,10 +40,10 @@ void BikeManager::initPins() {
 void BikeManager::adjustThrottle(int inValue) {
 	if (Global::timeRunning >= throttleLastProcessing + 250) {
 		targetThrottleValue = inValue / 4;
-		if (SignalProcessor::brakePulled || ! SignalProcessor::isPedaling) {
-			targetThrottleValue = 0;
-			currentThrottleValue = 0;
-		}
+//		if (SignalProcessor::brakePulled || ! SignalProcessor::isPedaling) {
+//			targetThrottleValue = 0;
+//			currentThrottleValue = 0;
+//		}
 		// smoothen increasing of throttle voltage
 		if (currentThrottleValue < targetThrottleValue) {
 			if (currentThrottleValue < 100) {
@@ -67,12 +67,12 @@ void BikeManager::adjustThrottle(int inValue) {
 //		}
 
 //		currentThrottleValue= 100;
-		Serial.print("adjust throttle:");
-		Serial.print("target value=");
-		Serial.print(targetThrottleValue);
-		Serial.print(", currentValue=");
-		Serial.print(currentThrottleValue);
-		Serial.println("");
+//		Serial.print("adjust throttle:");
+//		Serial.print("target value=");
+//		Serial.print(targetThrottleValue);
+//		Serial.print(", currentValue=");
+//		Serial.print(currentThrottleValue);
+//		Serial.println("");
 		analogWrite(config::throttleOutPin, currentThrottleValue);
 		throttleLastProcessing = Global::timeRunning;
 	}

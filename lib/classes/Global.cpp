@@ -8,4 +8,6 @@
 #include "Global.h"
 
 unsigned long Global::timeRunning = 0;
+unsigned long Global::microsecRunning = 0;
+
 

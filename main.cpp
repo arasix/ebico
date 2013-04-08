@@ -16,6 +16,7 @@ void setup() {
 
 void loop() {
 	Global::timeRunning = millis();
+	Global::microsecRunning = micros();
 	bool isReady = sigPro.processSignals();
 	if (isReady) {
 		int throttleOutSignal = bikeManager.throttleOutSignal();

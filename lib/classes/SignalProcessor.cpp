@@ -11,7 +11,6 @@ SignalProcessor::SignalProcessor() {
 unsigned long SignalProcessor::pasLastProcessing = 0;
 unsigned long SignalProcessor::throttleLastProcessing = 0;
 unsigned long SignalProcessor::brakeLastProcessing = 0;
-unsigned long SignalProcessor::wheelLastProcessing = 0;
 unsigned long SignalProcessor::currentLastProcessing = 0;
 unsigned long SignalProcessor::debugLastProcessing = 0;
 float SignalProcessor::current;
@@ -27,10 +26,8 @@ int SignalProcessor::pasDirection;
 bool SignalProcessor::isPedaling = false;
 unsigned int SignalProcessor::throttleSignal = 0;
 bool SignalProcessor::brakePulled = true;
-unsigned int SignalProcessor::wheelSignalCount = 0;
-unsigned long SignalProcessor::wheelTimeCount = 0;
-unsigned long SignalProcessor::wheelLastSignal = 0;
-unsigned int SignalProcessor::wheelRPM = 0;
+unsigned long SignalProcessor::wheelLastSignal;
+float SignalProcessor::wheelRPM = 0;
 
 void SignalProcessor::startCollect() {
 	Serial.println("call: SignalProcessor::collect()");
@@ -44,13 +41,11 @@ void SignalProcessor::stopCollect() {
 }
 
 void SignalProcessor::collectWheelSignals() {
-
-	// for some funny reson, 2 interrupts are called each round...
-	if (Global::timeRunning > wheelLastSignal + 5) {
-		++ wheelSignalCount;
-		wheelTimeCount += Global::timeRunning - wheelLastSignal;
+	// for some funny reason 2 interrupts are called on each rotation...
+	if (Global::microsecRunning > wheelLastSignal + 50) {
+		wheelRPM = 1000000 / ((float)(Global::microsecRunning - wheelLastSignal)) * 60;
 	}
-	wheelLastSignal = Global::timeRunning;
+	wheelLastSignal = Global::microsecRunning;
 }
 
 void SignalProcessor::collectPasSignals() {
@@ -82,7 +77,6 @@ bool SignalProcessor::processSignals() {
 
 	// process trhottle signal
 	if (Global::timeRunning >= throttleLastProcessing + 200) {
-
 		int tSig = (analogRead(config::throttleSensorPin) - 100) * 1.33;
 		tSig < 200 ? tSig = 0 : tSig > 1010 ? tSig = 1023 : tSig;
 		throttleSignal = tSig;
@@ -95,15 +89,6 @@ bool SignalProcessor::processSignals() {
 		brakeLastProcessing = Global::timeRunning;
 	}
 
-	// process wheel signal
-	if (Global::timeRunning >= wheelLastProcessing + 1000) {
-		float millisecPerRound = wheelTimeCount / wheelSignalCount;
-		wheelRPM = 60000 / millisecPerRound;
-		wheelSignalCount = 0;
-		wheelTimeCount = 0;
-		wheelLastProcessing = Global::timeRunning;
-	}
-
 	// process curent signal
 	if (Global::timeRunning >= currentLastProcessing + 50) {
 		float signal = analogRead(config::currentSensorPin);
@@ -112,6 +97,10 @@ bool SignalProcessor::processSignals() {
 //		Serial.print(current);
 //		Serial.println("");
 		currentLastProcessing = Global::timeRunning;
+	}
+
+	if (wheelLastSignal < Global::microsecRunning - 2000000) {
+		wheelRPM = 0;
 	}
 
 	// serial output for debugging
@@ -133,13 +122,8 @@ bool SignalProcessor::processSignals() {
 				Serial.print(", speed km/h=");
 				Serial.print((wheelRPM * 2.090 * 60) / 1000);
 				Serial.println("");
-				pasLastProcessing = Global::timeRunning;
-				pasTimeOn = 0;
-				pasTimeOff = 0;
-				pasSignalCount = 0;
-
-
 		debugLastProcessing = Global::timeRunning;
+
 	}
 
 	return true;
