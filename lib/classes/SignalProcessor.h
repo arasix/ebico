@@ -16,30 +16,27 @@ public:
 	void startCollect();
 	void stopCollect();
 	bool processSignals();
-	static unsigned int pasRPM;
-	static int pasDirection;
+	static float pasRPM;
+	static uint8_t pasDirection;
 	static bool isPedaling;
-	static unsigned int throttleSignal;
+	static uint8_t throttleSignal;
 	static bool brakePulled;
 	static float wheelRPM;
-	static float current;
-
+	static float amperage;
 private:
 	static void collectPasSignals();
 	static void collectWheelSignals();
 	unsigned static long pasLastProcessing;
 	unsigned static long throttleLastProcessing;
 	unsigned static long brakeLastProcessing;
-	unsigned static long currentLastProcessing;
+	unsigned static long amperageLastProcessing;
 	unsigned static long debugLastProcessing;
-	unsigned static long pasTime;
 	unsigned static long pasLastTime;
 	unsigned static int pasTimeOn;
 	unsigned static int pasTimeOff;
-	unsigned static int pasSignalCount;
-	unsigned static long pasLastValidSignal;
+	unsigned static long pasLastOnSignal;
+	unsigned static long pasLastForwardSignal;
 	unsigned static long wheelLastSignal;
-	static unsigned int currentSignal;
-
 };
+
 #endif /* SIGNALPROCESSOR_H_ */

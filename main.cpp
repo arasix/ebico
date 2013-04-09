@@ -15,12 +15,10 @@ void setup() {
 }
 
 void loop() {
-	Global::timeRunning = millis();
+	Global::millisecRunning = millis();
 	Global::microsecRunning = micros();
 	bool isReady = sigPro.processSignals();
 	if (isReady) {
-		int throttleOutSignal = bikeManager.throttleOutSignal();
-
-		bikeManager.adjustThrottle(throttleOutSignal);
+		bikeManager.adjustThrottle();
 	}
 }

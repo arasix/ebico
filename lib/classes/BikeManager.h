@@ -1,9 +1,8 @@
 /*
  * BikeManager.h
  *
- *  Created on: Apr 5, 2013
- *      Author: stefan
  */
+#include "Arduino.h"
 
 #ifndef BIKEMANAGER_H_
 #define BIKEMANAGER_H_
@@ -12,13 +11,11 @@ class BikeManager {
 public:
 	BikeManager();
 	virtual ~BikeManager();
-	unsigned int throttleOutSignal();
 	void initPins();
-	void adjustThrottle(int value);
+	void adjustThrottle();
 private:
-	unsigned static int currentThrottleValue;
-	unsigned static int targetThrottleValue;
-	unsigned static long throttleLastProcessing;
+	static uint8_t throttleValueActual;
+	unsigned static long throttleLastProcessed;
 };
 
 #endif /* BIKEMANAGER_H_ */

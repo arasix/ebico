@@ -5,13 +5,22 @@
  *      Author: stefan
  */
 
+#include "Arduino.h"
+
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
 class Global {
 public:
-	unsigned static long timeRunning;
+	unsigned static long millisecRunning;
 	unsigned static long microsecRunning;
+	static const uint8_t pasSensorPin = 2;
+	static const uint8_t wheelSensorPin = 3;
+	static const uint8_t brakeSensorPin = 4;
+	static const uint8_t throttleSensorPin = A0;
+	static const uint8_t amperageSensorPin = A1;
+	static const uint8_t pasNrMagnets = 12;
+	static const uint8_t throttleOutPin = 5;
 };
 
 #endif /* GLOBAL_H_ */

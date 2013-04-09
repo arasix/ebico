@@ -1,80 +1,72 @@
 /*
  * BikeManager.cpp
  *
- *  Created on: Apr 5, 2013
- *      Author: stefan
  */
 
 #include "BikeManager.h"
 #include "../../main.h"
 
 BikeManager::BikeManager() {
-	// TODO Auto-generated constructor stub
-
 }
 
 BikeManager::~BikeManager() {
-	// TODO Auto-generated destructor stub
 }
 
-unsigned long BikeManager::throttleLastProcessing = 0;
-unsigned int BikeManager::currentThrottleValue = 0;
-unsigned int BikeManager::targetThrottleValue = 0;
-
-unsigned int BikeManager::throttleOutSignal() {
-	unsigned int outSignal = SignalProcessor::throttleSignal;
-	return outSignal;
-}
+unsigned long BikeManager::throttleLastProcessed = 0;
+uint8_t BikeManager::throttleValueActual = 0;
 
 void BikeManager::initPins() {
-	pinMode(config::pasSensorPin, INPUT);
-	digitalWrite(config::pasSensorPin, HIGH);
-	pinMode(config::wheelSensorPin, INPUT);
-	digitalWrite(config::wheelSensorPin, HIGH);
-	pinMode(config::throttleSensorPin, INPUT);
-	pinMode(config::brakeSensorPin, INPUT);
-	pinMode(config::currentSensorPin, INPUT);
-	pinMode(config::throttleOutPin, OUTPUT);
+	pinMode(Global::pasSensorPin, INPUT);
+	digitalWrite(Global::pasSensorPin, HIGH);
+	pinMode(Global::wheelSensorPin, INPUT);
+	digitalWrite(Global::wheelSensorPin, HIGH);
+	pinMode(Global::throttleSensorPin, INPUT);
+	pinMode(Global::brakeSensorPin, INPUT);
+	pinMode(Global::amperageSensorPin, INPUT);
+	pinMode(Global::throttleOutPin, OUTPUT);
 }
 
-void BikeManager::adjustThrottle(int inValue) {
-	if (Global::timeRunning >= throttleLastProcessing + 250) {
-		targetThrottleValue = inValue / 4;
+void BikeManager::adjustThrottle() {
+	if (Global::millisecRunning >= throttleLastProcessed + 250) {
+		uint8_t throttleValueDesired = SignalProcessor::throttleSignal / 4;
+		uint8_t throttleValueNew = 0;
 //		if (SignalProcessor::brakePulled || ! SignalProcessor::isPedaling) {
-//			targetThrottleValue = 0;
-//			currentThrottleValue = 0;
+//			throttleValueDesired = 0;
+//			throttleValueActual = 0;
 //		}
-		// smoothen increasing of throttle voltage
-		if (currentThrottleValue < targetThrottleValue) {
-			if (currentThrottleValue < 100) {
-				currentThrottleValue += 50;
-			} else if (currentThrottleValue < 110) {
-				currentThrottleValue += 3;
-			} else if (currentThrottleValue < 120) {
-				currentThrottleValue += 1;
+		// smoothen adjustment of throttle voltage
+		if (throttleValueActual < throttleValueDesired) {
+			if (throttleValueActual < 90) {
+				throttleValueNew = throttleValueActual + 45;
+				if (throttleValueNew > 100) {
+					throttleValueNew = 100;
+				}
+			} else if (throttleValueActual < 110) {
+				throttleValueNew = throttleValueActual + 3;
+			} else if (throttleValueActual < 110) {
+				throttleValueNew = throttleValueActual + 3;
 			}
 			else {
-				currentThrottleValue ++;
+				throttleValueNew = throttleValueActual + 1;
 			}
 		}
-		if (currentThrottleValue > targetThrottleValue) {
-			currentThrottleValue = targetThrottleValue;
+		if (throttleValueNew > throttleValueDesired) {
+			throttleValueNew = throttleValueDesired;
 		}
-
-//		currentThrottleValue = currentThrottleValue + (512 / (currentThrottleValue + 20));
-//		if (currentThrottleValue > targetThrottleValue) {
-//			currentThrottleValue = targetThrottleValue;
+//		throttleValueActual = throttleValueActual + (512 / (throttleValueActual + 20));
+//		if (throttleValueActual > throttleValueDesired) {
+//			throttleValueActual = throttleValueDesired;
 //		}
-
-//		currentThrottleValue= 100;
+//		throttleValueActual= 100;
 //		Serial.print("adjust throttle:");
 //		Serial.print("target value=");
-//		Serial.print(targetThrottleValue);
-//		Serial.print(", currentValue=");
-//		Serial.print(currentThrottleValue);
+//		Serial.print(throttleValueDesired);
+//		Serial.print(", amperageValue=");
+//		Serial.print(throttleValueActual);
 //		Serial.println("");
-		analogWrite(config::throttleOutPin, currentThrottleValue);
-		throttleLastProcessing = Global::timeRunning;
+		analogWrite(Global::throttleOutPin, throttleValueNew);
+		throttleValueActual = throttleValueNew;
+		throttleLastProcessed = Global::millisecRunning;
 	}
 }
 

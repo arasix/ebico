@@ -1,13 +1,7 @@
-// Only modify this file to include
-// - function definitions (prototypes)
-// - include files
-// - extern variable definitions
-// In the appropriate section
 
 #ifndef ebico_H_
 #define ebico_H_
 #include "Arduino.h"
-#include "config.h"
 #include "lib/classes/Global.h"
 #include "lib/classes/SignalProcessor.h"
 #include "lib/classes/BikeManager.h"
