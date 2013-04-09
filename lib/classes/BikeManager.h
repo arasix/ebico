@@ -14,7 +14,7 @@ public:
 	void initPins();
 	void adjustThrottle();
 private:
-	static uint8_t throttleValueActual;
+	static float throttleValueActual;
 	unsigned static long throttleLastProcessed;
 };
 

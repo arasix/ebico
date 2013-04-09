@@ -13,7 +13,7 @@ BikeManager::~BikeManager() {
 }
 
 unsigned long BikeManager::throttleLastProcessed = 0;
-uint8_t BikeManager::throttleValueActual = 0;
+float BikeManager::throttleValueActual = 0;
 
 void BikeManager::initPins() {
 	pinMode(Global::pasSensorPin, INPUT);
@@ -27,9 +27,8 @@ void BikeManager::initPins() {
 }
 
 void BikeManager::adjustThrottle() {
-	if (Global::millisecRunning >= throttleLastProcessed + 250) {
-		uint8_t throttleValueDesired = SignalProcessor::throttleSignal / 4;
-		uint8_t throttleValueNew = 0;
+	if (Global::millisecRunning >= throttleLastProcessed + 100) {
+		unsigned int throttleValueDesired = SignalProcessor::throttleSignal / 4;
 //		if (SignalProcessor::brakePulled || ! SignalProcessor::isPedaling) {
 //			throttleValueDesired = 0;
 //			throttleValueActual = 0;
@@ -37,35 +36,26 @@ void BikeManager::adjustThrottle() {
 		// smoothen adjustment of throttle voltage
 		if (throttleValueActual < throttleValueDesired) {
 			if (throttleValueActual < 90) {
-				throttleValueNew = throttleValueActual + 45;
-				if (throttleValueNew > 100) {
-					throttleValueNew = 100;
-				}
+				throttleValueActual += 20;
 			} else if (throttleValueActual < 110) {
-				throttleValueNew = throttleValueActual + 3;
+				throttleValueActual += 1;
 			} else if (throttleValueActual < 110) {
-				throttleValueNew = throttleValueActual + 3;
+				throttleValueActual += .8;
 			}
 			else {
-				throttleValueNew = throttleValueActual + 1;
+				throttleValueActual += .5;
 			}
 		}
-		if (throttleValueNew > throttleValueDesired) {
-			throttleValueNew = throttleValueDesired;
+		if (throttleValueActual > throttleValueDesired) {
+			throttleValueActual = throttleValueDesired;
 		}
-//		throttleValueActual = throttleValueActual + (512 / (throttleValueActual + 20));
-//		if (throttleValueActual > throttleValueDesired) {
-//			throttleValueActual = throttleValueDesired;
-//		}
-//		throttleValueActual= 100;
-//		Serial.print("adjust throttle:");
-//		Serial.print("target value=");
-//		Serial.print(throttleValueDesired);
-//		Serial.print(", amperageValue=");
-//		Serial.print(throttleValueActual);
-//		Serial.println("");
-		analogWrite(Global::throttleOutPin, throttleValueNew);
-		throttleValueActual = throttleValueNew;
+		Serial.print("adjust throttle:");
+		Serial.print(", desired=");
+		Serial.print(throttleValueDesired);
+		Serial.print(", actual=");
+		Serial.print(throttleValueActual);
+		Serial.println("");
+		analogWrite(Global::throttleOutPin, (int) throttleValueActual);
 		throttleLastProcessed = Global::millisecRunning;
 	}
 }
