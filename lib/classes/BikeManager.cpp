@@ -39,22 +39,23 @@ float  BikeManager::increaseThrottleValue(float actualValue, unsigned int min = 
 }
 
 void BikeManager::adjustThrottle() {
-	if (Global::millisecRunning >= throttleLastProcessed + 10) {
-		//unsigned int throttleValueDesired = SignalProcessor::throttleSignal / 4;
-		unsigned int throttleValueDesired = 255;
+	if (Global::millisecRunning >= throttleLastProcessed + 50) {
+		unsigned int throttleValueDesired = SignalProcessor::throttleSignal / 4;
+
 //		if (SignalProcessor::brakePulled || ! SignalProcessor::isPedaling) {
 //			throttleValueDesired = 0;
 //			throttleValueActual = 0;
 //		}
 		// smoothen adjustment of throttle voltage
-		throttleValueActual = increaseThrottleValue(throttleValueActual, 60, throttleValueDesired, 20);
+		throttleValueActual = increaseThrottleValue(throttleValueActual, 100, throttleValueDesired, 1);
 		Serial.print("adjust throttle:");
 		Serial.print(", desired=");
 		Serial.print(throttleValueDesired);
 		Serial.print(", actual=");
 		Serial.print(throttleValueActual);
 		Serial.println("");
-		analogWrite(Global::throttleOutPin, (int) throttleValueActual);
+
+		analogWrite(Global::throttleOutPin, throttleValueActual);
 		throttleLastProcessed = Global::millisecRunning;
 	}
 }
