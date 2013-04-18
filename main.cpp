@@ -4,8 +4,10 @@
 SignalProcessor sigPro;
 BikeManager bikeManager;
 
+
 void setup() {
 
+	SPI.begin();
 	Serial.begin(115200);
 	delay(200);
 	Serial.println("Start ebico");
@@ -22,3 +24,4 @@ void loop() {
 		bikeManager.adjustThrottle();
 	}
 }
+

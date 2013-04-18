@@ -113,14 +113,20 @@ bool SignalProcessor::processSignals() {
 	// process trhottle signal
 	if (Global::millisecRunning >= throttleLastProcessing + 51) {
 		int tSig = (analogRead(Global::throttleSensorPin) - 100) * 1.33;
-		tSig < 200 ? tSig = 0 : tSig > 1010 ? tSig = 1023 : tSig;
+		tSig += 260;
+		Serial.print("throttle raw=");
+		Serial.print(tSig);
+		tSig < 400 ? tSig = 0 : tSig > 1010 ? tSig = 1023 : tSig;
+		Serial.print("throttle corr=");
+		Serial.print(tSig);
+		Serial.println("");
 		throttleSignal = tSig;
 		throttleLastProcessing = Global::millisecRunning;
 	}
 
 	// process brake signal
 	if (Global::millisecRunning >= brakeLastProcessing + 111) {
-		brakePulled = digitalRead(Global::brakeSensorPin) == 0;
+		brakePulled = digitalRead(Global::brakeSensorPin1) == 0;
 		brakeLastProcessing = Global::millisecRunning;
 	}
 

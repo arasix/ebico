@@ -1,8 +1,6 @@
 /*
  * Global.h
  *
- *  Created on: Apr 6, 2013
- *      Author: stefan
  */
 
 #include "Arduino.h"
@@ -16,10 +14,12 @@ public:
 	unsigned static long microsecRunning;
 	static const uint8_t pasSensorPin = 2;
 	static const uint8_t wheelSensorPin = 3;
-	static const uint8_t brakeSensorPin = 4;
+	static const uint8_t brakeSensorPin1 = 4;
+	static const uint8_t brakeSensorPin2 = 5;
 	static const uint8_t throttleSensorPin = A0;
 	static const uint8_t amperageSensorPin = A1;
 	static const uint8_t pasNrMagnets = 12;
+	static const uint8_t digiPotSelectPin = 10;
 	static const uint8_t throttleOutPin = 5;
 };
 
