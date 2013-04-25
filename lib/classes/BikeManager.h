@@ -15,11 +15,11 @@ public:
 	virtual ~BikeManager();
 	void initPins();
 	void adjustThrottle();
+	static void digitalPotWrite(int value);
 private:
 	static float throttleValueActual;
 	unsigned static long throttleLastProcessed;
 	float increaseThrottleValue(float actualValue, unsigned int min, unsigned int max, float slope);
-	static void digitalPotWrite(int value);
 };
 
 #endif /* BIKEMANAGER_H_ */

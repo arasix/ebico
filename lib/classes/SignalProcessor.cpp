@@ -23,6 +23,8 @@ float SignalProcessor::pasRPM = 0;
 int8_t SignalProcessor::pasDirection;
 bool SignalProcessor::isPedaling = false;
 unsigned int SignalProcessor::throttleSignal = 0;
+bool SignalProcessor::brake1Pulled = true;
+bool SignalProcessor::brake2Pulled = true;
 bool SignalProcessor::brakePulled = true;
 unsigned long SignalProcessor::wheelLastSignal;
 float SignalProcessor::wheelRPM = 0;
@@ -30,7 +32,9 @@ int8_t SignalProcessor::pasCnt = 0;
 unsigned long SignalProcessor::pasRotationTime = 0;
 
 void SignalProcessor::startCollect() {
-	Serial.println("call: SignalProcessor::collect()");
+	if (Global::DEBUG) {
+		Serial.println("call: SignalProcessor::collect()");
+	}
 	attachInterrupt(0, SignalProcessor::collectPasSignals, CHANGE);
 	attachInterrupt(1, SignalProcessor::collectWheelSignals, RISING);
 }
@@ -47,17 +51,6 @@ void SignalProcessor::collectWheelSignals() {
 	}
 	wheelLastSignal = Global::microsecRunning;
 }
-//
-//void SignalProcessor::collectPasSignals() {
-//	SignalProcessor::pasTime = millis();
-//	if (digitalRead(Global::pasSensorPin) == 1) {
-//		SignalProcessor::pasTimeOn += SignalProcessor::pasTime - SignalProcessor::pasLastTime;
-//		SignalProcessor::pasSignalCount++;
-//	} else {
-//		SignalProcessor::pasTimeOff += SignalProcessor::pasTime	- SignalProcessor::pasLastTime;
-//	}
-//	SignalProcessor::pasLastTime = SignalProcessor::pasTime;
-//}
 
 void SignalProcessor::collectPasSignals() {
 	if (digitalRead(Global::pasSensorPin) == 1) {
@@ -71,15 +64,6 @@ void SignalProcessor::collectPasSignals() {
 			} else {
 				pasDirection = -1;
 			}
-//			Serial.print("halbe Runde voll, ");
-//			Serial.print(pasTimeOn);
-//			Serial.print(":");
-//			Serial.print(pasTimeOff);
-//			Serial.print(", rpm=");
-//			Serial.print(pasRPM);
-//			Serial.print(", dir=");
-//			Serial.print(pasDirection);
-//			Serial.println("");
 			pasTimeOn = 0;
 			pasTimeOff = 0;
 			pasCnt = 0;
@@ -87,7 +71,6 @@ void SignalProcessor::collectPasSignals() {
 		}
 		pasLastOnSignal = Global::microsecRunning;
 	} else {
-		//Serial.println(0);
 		pasTimeOff += Global::microsecRunning - pasLastTime;
 	}
 	pasLastTime = Global::microsecRunning;
@@ -103,7 +86,8 @@ bool SignalProcessor::processSignals() {
 		if (pasRPM < 5) {
 			pasDirection = 0;
 		}
-		isPedaling = pasLastForwardSignal > Global::microsecRunning - 2e6;
+		//isPedaling = pasLastForwardSignal > Global::microsecRunning - 2e6;
+		isPedaling = pasLastOnSignal > Global::microsecRunning - 2e6;
 		// wheel signal
 		if (wheelLastSignal < Global::microsecRunning - 2e6) {
 			wheelRPM = 0;
@@ -111,22 +95,31 @@ bool SignalProcessor::processSignals() {
 	}
 
 	// process trhottle signal
-	if (Global::millisecRunning >= throttleLastProcessing + 51) {
-		int tSig = (analogRead(Global::throttleSensorPin) - 100) * 1.33;
-		tSig += 260;
-		Serial.print("throttle raw=");
-		Serial.print(tSig);
-		tSig < 400 ? tSig = 0 : tSig > 1010 ? tSig = 1023 : tSig;
-		Serial.print("throttle corr=");
-		Serial.print(tSig);
-		Serial.println("");
+	if (Global::millisecRunning >= throttleLastProcessing + 151) {
+		int rawSig = (analogRead(Global::throttleSensorPin));
+		float sfactor =  (float(rawSig) / 700) * .47 + 1;
+		int tSig = (rawSig ) *   sfactor;
+		tSig = tSig/4.3;
+		if (tSig < 8) {
+			tSig = 0;
+		} else if (tSig > 230) {
+			tSig = 240;
+		}
+//		Serial.print("raw=");
+//		Serial.print(rawSig);
+//		Serial.print(", sfact=");
+//		Serial.print(sfactor);
+//		Serial.print(", sig=");
+//		Serial.println(tSig);
 		throttleSignal = tSig;
 		throttleLastProcessing = Global::millisecRunning;
 	}
 
 	// process brake signal
 	if (Global::millisecRunning >= brakeLastProcessing + 111) {
-		brakePulled = digitalRead(Global::brakeSensorPin1) == 0;
+		brake1Pulled = digitalRead(Global::brakeSensorPin1) == 0;
+		brake2Pulled = digitalRead(Global::brakeSensorPin2) == 0;
+		brakePulled = brake1Pulled || brake2Pulled;
 		brakeLastProcessing = Global::millisecRunning;
 	}
 
@@ -134,34 +127,30 @@ bool SignalProcessor::processSignals() {
 	if (Global::millisecRunning >= amperageLastProcessing + 21) {
 		float signal = analogRead(Global::amperageSensorPin);
 		amperage = signal / 20;
-//		Serial.print("amperage Amp=");
-//		Serial.print(amperage);
-//		Serial.println("");
 		amperageLastProcessing = Global::millisecRunning;
 	}
 
 	// serial output for debugging
-	if (Global::millisecRunning >= debugLastProcessing + 20000) {
-				Serial.print("isPedaling=");
-				Serial.print(isPedaling);
-				Serial.print(", pedal RPM=");
-				Serial.print(pasRPM);
-		//		Serial.print(", signal  count=");
-		//		Serial.print(pasSignalCount);
-				Serial.print(", direction=");
-				Serial.print(pasDirection);
-				Serial.print(", brake=");
-				Serial.print(brakePulled);
-				Serial.print(", throttle=");
-				Serial.print(throttleSignal);
-				Serial.print(", wheel RPM=");
-				Serial.print(wheelRPM);
-				Serial.print(", speed km/h=");
-				Serial.print((wheelRPM * 2.090 * 60) / 1000);
-				Serial.println("");
+	if (Global::DEBUG && (Global::millisecRunning >= debugLastProcessing + 2000)) {
+		Serial.print("isPedaling=");
+		Serial.print(isPedaling);
+		Serial.print(", pedal RPM=");
+		Serial.print(pasRPM);
+		Serial.print(", direction=");
+		Serial.print(pasDirection);
+		Serial.print(", brake1=");
+		Serial.print(brake1Pulled);
+		Serial.print(", brake2=");
+		Serial.print(brake2Pulled);
+		Serial.print(", throttle=");
+		Serial.print(throttleSignal);
+		Serial.print(", wheel RPM=");
+		Serial.print(wheelRPM);
+		Serial.print(", speed km/h=");
+		Serial.print((wheelRPM * 2.090 * 60) / 1000);
+		Serial.println("");
 		debugLastProcessing = Global::millisecRunning;
 	}
-
 	return true;
 }
 

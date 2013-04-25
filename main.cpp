@@ -6,12 +6,13 @@ BikeManager bikeManager;
 
 
 void setup() {
-
 	SPI.begin();
-	Serial.begin(115200);
-	delay(200);
-	Serial.println("Start ebico");
 	delay(100);
+	if (Global::DEBUG) {
+		Serial.begin(115200);
+		delay(200);
+		Serial.println("Start ebico");
+	}
 	bikeManager.initPins();
 	sigPro.startCollect();
 }

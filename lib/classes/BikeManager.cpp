@@ -24,7 +24,6 @@ void BikeManager::initPins() {
 	pinMode(Global::brakeSensorPin1, INPUT);
 	pinMode(Global::brakeSensorPin2, INPUT);
 	pinMode(Global::amperageSensorPin, INPUT);
-	pinMode(Global::throttleOutPin, OUTPUT);
 	pinMode (Global::digiPotSelectPin, OUTPUT);
 }
 
@@ -38,11 +37,12 @@ void BikeManager::digitalPotWrite(int value){
 	  digitalWrite(Global::digiPotSelectPin, HIGH);
 }
 
-float  BikeManager::increaseThrottleValue(float actualValue, unsigned int min = 60, unsigned int max = 255, float slope = 1) {
+float  BikeManager::increaseThrottleValue(float actualValue, unsigned int min = 80, unsigned int max = 120, float slope = 1) {
 	if (actualValue < min) {
 		actualValue = min;
 	}
-	float addValue = (max - actualValue) * (max * 0.0001 * (1/slope));
+	//float addValue = (max - actualValue) * (max * 0.0005 * (1/slope));
+	float addValue =  0.2;
 	actualValue += addValue;
 	if (actualValue > max) {
 		actualValue = max;
@@ -51,34 +51,26 @@ float  BikeManager::increaseThrottleValue(float actualValue, unsigned int min = 
 }
 
 void BikeManager::adjustThrottle() {
-	if (Global::millisecRunning >= throttleLastProcessed + 20) {
-		unsigned int throttleValueDesired = SignalProcessor::throttleSignal / 4;
-		if (throttleValueDesired > 240) {
-			throttleValueDesired = 240;
-		}
-
-		if (SignalProcessor::brakePulled /*|| ! SignalProcessor::isPedaling */) {
+	if (Global::millisecRunning >= throttleLastProcessed + 50) {
+		unsigned int throttleValueDesired = SignalProcessor::throttleSignal / 2;
+		if (SignalProcessor::brakePulled  || ! SignalProcessor::isPedaling ) {
 			throttleValueDesired = 0;
 			throttleValueActual = 0;
 		}
 		// smoothen adjustment of throttle voltage
-		throttleValueActual = increaseThrottleValue(throttleValueActual, 60, throttleValueDesired, 1);
-//		Serial.print("adjust throttle:");
-//		Serial.print(", desired=");
-//		Serial.print(throttleValueDesired);
-//		Serial.print(", actual=");
-//		Serial.print(throttleValueActual);
-//		Serial.println("");
-//		analogWrite(Global::throttleOutPin, throttleValueActual);
-
-		int tval = (int) throttleValueActual / 2;
-//		Serial.print("tval=");
-//		Serial.println(tval);
-
-		  digitalPotWrite(tval);
-
-
-
+		int tresholdVal =  ((int) SignalProcessor::wheelRPM / 10) + 42;
+		throttleValueActual = increaseThrottleValue(throttleValueActual, tresholdVal, throttleValueDesired, 1);
+		if (Global::DEBUG) {
+//			Serial.print("adjust throttle:");
+//			Serial.print(", desired=");
+//			Serial.print(throttleValueDesired);
+//			Serial.print(", actual=");
+//			Serial.print(throttleValueActual);
+//			Serial.println("");
+		}
+//		analogWrite(Global::throttleOutPin, throttleValueActual)
+		int tval = (int) throttleValueActual;
+		digitalPotWrite(tval);
 		throttleLastProcessed = Global::millisecRunning;
 	}
 }

@@ -10,6 +10,7 @@
 
 class Global {
 public:
+	static const boolean DEBUG = false;
 	unsigned static long millisecRunning;
 	unsigned static long microsecRunning;
 	static const uint8_t pasSensorPin = 2;
@@ -20,7 +21,6 @@ public:
 	static const uint8_t amperageSensorPin = A1;
 	static const uint8_t pasNrMagnets = 12;
 	static const uint8_t digiPotSelectPin = 10;
-	static const uint8_t throttleOutPin = 5;
 };
 
 #endif /* GLOBAL_H_ */

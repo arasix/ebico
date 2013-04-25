@@ -20,6 +20,8 @@ public:
 	static int8_t pasDirection;
 	static bool isPedaling;
 	static unsigned int throttleSignal;
+	static bool brake1Pulled;
+	static bool brake2Pulled;
 	static bool brakePulled;
 	static float wheelRPM;
 	static float amperage;
