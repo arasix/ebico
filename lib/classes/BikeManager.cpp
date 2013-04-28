@@ -50,6 +50,25 @@ float  BikeManager::increaseThrottleValue(float actualValue, unsigned int min = 
 	return actualValue;
 }
 
+
+float BikeManager::limitThrottleVal(float rpm) {
+	int offset = 42;
+	int max = 105;
+	int releaseFromRPM = 280;
+	if (rpm > releaseFromRPM) {
+		return max;
+	}
+	max = max - offset;
+	float val = ((max - max * (rpm / releaseFromRPM)) - max ) *  -1 + offset;
+//	Serial.print(", rpm=");
+//	Serial.print(rpm);
+//	Serial.print(", val=");
+//	Serial.print(val);
+//	Serial.println("");
+	return  val;
+
+}
+
 void BikeManager::adjustThrottle() {
 	if (Global::millisecRunning >= throttleLastProcessed + 50) {
 		unsigned int throttleValueDesired = SignalProcessor::throttleSignal / 2;
@@ -58,8 +77,13 @@ void BikeManager::adjustThrottle() {
 			throttleValueActual = 0;
 		}
 		// smoothen adjustment of throttle voltage
-		int tresholdVal =  ((int) SignalProcessor::wheelRPM / 10) + 42;
-		throttleValueActual = increaseThrottleValue(throttleValueActual, tresholdVal, throttleValueDesired, 1);
+		int motorStartOffset = 42;
+		int pullUpValue =  ((int) SignalProcessor::wheelRPM / 10);
+		throttleValueActual = increaseThrottleValue(throttleValueActual, (motorStartOffset+pullUpValue) , throttleValueDesired, 1);
+		int topValue = limitThrottleVal(SignalProcessor::wheelRPM);
+		if (throttleValueActual > topValue) {
+			throttleValueActual = topValue;
+		}
 		if (Global::DEBUG) {
 //			Serial.print("adjust throttle:");
 //			Serial.print(", desired=");
@@ -68,7 +92,6 @@ void BikeManager::adjustThrottle() {
 //			Serial.print(throttleValueActual);
 //			Serial.println("");
 		}
-//		analogWrite(Global::throttleOutPin, throttleValueActual)
 		int tval = (int) throttleValueActual;
 		digitalPotWrite(tval);
 		throttleLastProcessed = Global::millisecRunning;

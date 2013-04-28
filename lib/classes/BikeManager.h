@@ -20,6 +20,7 @@ private:
 	static float throttleValueActual;
 	unsigned static long throttleLastProcessed;
 	float increaseThrottleValue(float actualValue, unsigned int min, unsigned int max, float slope);
+	static float limitThrottleVal(float rpm);
 };
 
 #endif /* BIKEMANAGER_H_ */
