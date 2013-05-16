@@ -87,7 +87,7 @@ bool SignalProcessor::processSignals() {
 			pasDirection = 0;
 		}
 		//isPedaling = pasLastForwardSignal > Global::microsecRunning - 2e6;
-		isPedaling = pasLastOnSignal > Global::microsecRunning - 2e6;
+		isPedaling = pasLastOnSignal > Global::microsecRunning - 1.5e6;
 		// wheel signal
 		if (wheelLastSignal < Global::microsecRunning - 2e6) {
 			wheelRPM = 0;
@@ -119,7 +119,7 @@ bool SignalProcessor::processSignals() {
 	if (Global::millisecRunning >= brakeLastProcessing + 111) {
 		brake1Pulled = digitalRead(Global::brakeSensorPin1) == 0;
 		brake2Pulled = digitalRead(Global::brakeSensorPin2) == 0;
-		brakePulled = brake1Pulled || brake2Pulled;
+		brakePulled = brake2Pulled ;// rake1Pulled ;;
 		brakeLastProcessing = Global::millisecRunning;
 	}
 
@@ -131,7 +131,7 @@ bool SignalProcessor::processSignals() {
 	}
 
 	// serial output for debugging
-	if (Global::DEBUG && (Global::millisecRunning >= debugLastProcessing + 2000)) {
+	if (Global::DEBUG && (Global::millisecRunning >= debugLastProcessing + 300)) {
 		Serial.print("isPedaling=");
 		Serial.print(isPedaling);
 		Serial.print(", pedal RPM=");
