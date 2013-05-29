@@ -20,6 +20,7 @@ unsigned long SignalProcessor::pasTimeOff = 0;
 unsigned long SignalProcessor::pasLastOnSignal = 0;
 unsigned long SignalProcessor::pasLastForwardSignal = 0;
 float SignalProcessor::pasRPM = 0;
+float SignalProcessor::voltageCompensation = 0;
 int8_t SignalProcessor::pasDirection;
 bool SignalProcessor::isPedaling = false;
 unsigned int SignalProcessor::throttleSignal = 0;
@@ -30,6 +31,7 @@ unsigned long SignalProcessor::wheelLastSignal;
 float SignalProcessor::wheelRPM = 0;
 int8_t SignalProcessor::pasCnt = 0;
 unsigned long SignalProcessor::pasRotationTime = 0;
+
 
 void SignalProcessor::startCollect() {
 	if (Global::DEBUG) {
@@ -77,7 +79,7 @@ void SignalProcessor::collectPasSignals() {
 }
 
 bool SignalProcessor::processSignals() {
-	// process PAS and wheel signal
+	// process PAS and wheel signal and peripherals
 	if (Global::millisecRunning >= pasLastProcessing + 50) {
 		// pas signal
 		if (pasLastOnSignal < Global::microsecRunning - 1e6) {
@@ -92,6 +94,8 @@ bool SignalProcessor::processSignals() {
 		if (wheelLastSignal < Global::microsecRunning - 2e6) {
 			wheelRPM = 0;
 		}
+		// voltage compensation
+		voltageCompensation =  0.0000025 * Global::millisecRunning; // 0.15 per minute running
 	}
 
 	// process trhottle signal
@@ -111,7 +115,7 @@ bool SignalProcessor::processSignals() {
 //		Serial.print(sfactor);
 //		Serial.print(", sig=");
 //		Serial.println(tSig);
-		throttleSignal = tSig;
+		throttleSignal = tSig / 2.38;
 		throttleLastProcessing = Global::millisecRunning;
 	}
 
@@ -132,22 +136,24 @@ bool SignalProcessor::processSignals() {
 
 	// serial output for debugging
 	if (Global::DEBUG && (Global::millisecRunning >= debugLastProcessing + 300)) {
-		Serial.print("isPedaling=");
+		Serial.print("isPed=");
 		Serial.print(isPedaling);
-		Serial.print(", pedal RPM=");
+		Serial.print(", ped RPM=");
 		Serial.print(pasRPM);
-		Serial.print(", direction=");
+		Serial.print(", dir=");
 		Serial.print(pasDirection);
-		Serial.print(", brake1=");
+		Serial.print(", br1=");
 		Serial.print(brake1Pulled);
-		Serial.print(", brake2=");
+		Serial.print(", br2=");
 		Serial.print(brake2Pulled);
-		Serial.print(", throttle=");
+		Serial.print(", throt=");
 		Serial.print(throttleSignal);
-		Serial.print(", wheel RPM=");
+		Serial.print(", whRPM=");
 		Serial.print(wheelRPM);
-		Serial.print(", speed km/h=");
+		Serial.print(", km/h=");
 		Serial.print((wheelRPM * 2.090 * 60) / 1000);
+		Serial.print(", vComp=");
+		Serial.print(voltageCompensation);
 		Serial.println("");
 		debugLastProcessing = Global::millisecRunning;
 	}

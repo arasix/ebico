@@ -17,6 +17,7 @@ public:
 	void stopCollect();
 	bool processSignals();
 	static float pasRPM;
+	static float voltageCompensation;
 	static int8_t pasDirection;
 	static bool isPedaling;
 	static unsigned int throttleSignal;
